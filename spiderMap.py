@@ -19,12 +19,6 @@ def storeDataToMysql():
     cursor.execute(create_table)
     cursor.execute(create_prepare)
     cursor.execute(create_execute)
-    load_table="""set @sql_load_txt=concat("load data local infile '/root/end.txt'",' into table operrecord_',date_format(NOW(),'%y%m%d%h')," fields terminated by ' '");"""
-    load_prepare="""PREPARE sql_load_txt FROM @sql_load_txt"""
-    load_execute="""EXECUTE sql_load_txt"""
-    cursor.execute(load_table)
-    cursor.execute(load_prepare)
-    cursor.execute(load_execute)
     test.commit()
     cursor.close()
 
@@ -52,7 +46,7 @@ def merge_dicts(*dict_args):
     return result
 
 
-def mobai(loc):
+def mobai1(loc):
     allmobai = []
     with ThreadPoolExecutor(max_workers=5) as executor:
         url = "https://mwx.mobike.com/mobike-api/rent/nearbyBikesInfo.do"
@@ -80,14 +74,47 @@ def mobai(loc):
             elif future.done():
                 data = future.result()["object"]
                 allmobai.extend(data)
-    inf = open("/root/end.txt", 'w+')
+    inf = open("/root/end1.txt", 'w+')
     for dic in allmobai:
         for idic in dic:
             inf.write(str(dic[idic])+' ')
         inf.write('\n')
     inf.close()
 
+def mobai2(loc):
+    allmobai = []
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        url = "https://mwx.mobike.com/mobike-api/rent/nearbyBikesInfo.do"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 7.0; HUAWEI NXT-AL10 Build/HUAWEINXT-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/53.0.2785.49 Mobile MQQBrowser/6.2 TBS/043632 Safari/537.36 MicroMessenger/6.6.1200(0x26060031) NetType/WIFI Language/zh_CN MicroMessenger/6.6.1200(0x26060031) NetType/WIFI Language/zh_CN",
+            "content-type": "application/x-www-form-urlencoded",
+            "referer": "https://servicewechat.com/wx80f809371ae33eda/167/page-frame.html"
 
+        }
+        data = {
+            "longitude": "",
+            "latitude": "",
+            "citycode": "0351"
+        }
+
+        future_to_url = {
+            executor.submit(load_url, url,
+                            merge_dicts(data, {"longitude": i.split(",")[0]}, {"latitude": i.split(",")[1]}), 60,
+                            headers): url for i in loc
+        }
+
+        for future in futures.as_completed(future_to_url):
+            if future.exception() is not None:
+                print(future.exception())
+            elif future.done():
+                data = future.result()["object"]
+                allmobai.extend(data)
+    inf = open("/root/end2.txt", 'w+')
+    for dic in allmobai:
+        for idic in dic:
+            inf.write(str(dic[idic])+' ')
+        inf.write('\n')
+    inf.close()
 
 
 def getloc1():
@@ -162,8 +189,7 @@ if __name__ == "__main__":
         allloc2 = pickle.load(inf2)
         inf2.close()
 
-        mobai(allloc1)
-        storeDataToMysql()
-        mobai(allloc2)
+        mobai1(allloc1)
+        mobai2(allloc2)
         storeDataToMysql()
         time.sleep(28800)
