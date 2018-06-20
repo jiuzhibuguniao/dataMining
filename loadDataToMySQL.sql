@@ -32,3 +32,8 @@ END$$
 DELIMITER ;
  
 CALL loaddata("/tmp/testdata.txt");
+
+
+
+
+this is a test
