@@ -6,7 +6,7 @@ def loadDataSet(fileName):  # 解析文件，按tab分割字段，得到一个�
     dataMat = []              # 文件的最后一个字段是类别标签
     fr = open(fileName)
     for line in fr.readlines():
-        curLine = line.strip().split('\t')
+        curLine = line.strip().split(',')
         fltLine = map(float, curLine)    # 将每个元素转成float类型
         dataMat.append(fltLine)
     return dataMat
