@@ -41,7 +41,8 @@ def kMeans(dataSet, k, distMeans =distEclud, createCent = randCent):
                 distJI = distMeans(centroids[j,:], dataSet[i,:])
                 if distJI < minDist:
                     minDist = distJI; minIndex = j  # 如果第i个数据点到第j个中心点更近，则将i归属为j
-            if clusterAssment[i,0] != minIndex: clusterChanged = True;  # 如果分配发生变化，则需要继续迭代
+            if clusterAssment[i,0] != minIndex: 
+                clusterChanged = True;  # 如果分配发生变化，则需要继续迭代
             clusterAssment[i,:] = minIndex,minDist**2   # 并将第i个数据点的分配情况存入字典
         print(centroids)
         for cent in range(k):   # 重新计算中心点
